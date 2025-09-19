@@ -11,24 +11,13 @@ class Lab1Screen extends StatefulWidget {
 }
 
 class _Lab1ScreenState extends State<Lab1Screen> {
-// Example 3x3 matrix (can be made dynamic)
-  // For Ax = b, this would be the augmented matrix [A|b]
-  // Example:
-  // 2x + y - z = 8
-  // -3x - y + 2z = -11
-  // -2x + y + 2z = -3
+
   List<List<double>> _initialMatrix = [
     [5, 0, 1, 11],
     [2, 6, -2, 8],
     [-3, 2, 10, 6],
   ];
 
-  // Or a simple square matrix if you only want to see row echelon form
-  // List<List<double>> _initialMatrix = [
-  //   [2, 1, -1],
-  //   [-3, -1, 2],
-  //   [-2, 1, 2],
-  // ];
 
 
   List<List<List<double>>> _matrixSteps = [];
@@ -69,9 +58,8 @@ class _Lab1ScreenState extends State<Lab1Screen> {
     }
   }
 
-  // --- UI to allow dynamic matrix input (Optional but good for dynamic size) ---
   int _rows = 3;
-  int _cols = 4; // For a 3x3 system Ax=b, this means 3 variables + 1 constant column
+  int _cols = 4;
   List<List<TextEditingController>> _controllers = [];
 
   void _initializeControllers() {

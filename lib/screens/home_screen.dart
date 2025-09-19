@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'lab1_screen.dart';
+import 'lab2_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.title});
@@ -35,7 +36,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Lab1Screen(title: lab2)),
+                  MaterialPageRoute(builder: (context) => Lab2Screen(title: lab2)),
                 );
               },
             ),

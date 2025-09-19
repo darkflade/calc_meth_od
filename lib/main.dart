@@ -11,9 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Patterns',
+      title: 'Numerical Methods Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+        primarySwatch: Colors.teal, // Changed theme color for distinction
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        useMaterial3: true, // Optional: use Material 3
       ),
       home: const HomeScreen(title: 'Navigation'),
     );
