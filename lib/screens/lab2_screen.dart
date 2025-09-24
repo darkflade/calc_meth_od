@@ -1,6 +1,6 @@
 // lib/screens/lab2_screen.dart
 import 'package:flutter/material.dart';
-import '../logic/lab2_logic.dart'; // Assuming your logic file is here
+import '../logic/lab2_logic.dart'; // Ensure this path is correct
 
 class Lab2Screen extends StatefulWidget {
   const Lab2Screen({super.key, required this.title});
@@ -9,62 +9,68 @@ class Lab2Screen extends StatefulWidget {
 
   @override
   State<Lab2Screen> createState() => _Lab2ScreenState();
-}class _Lab2ScreenState extends State<Lab2Screen> {
-  // Your provided initial matrix A and vector d
+}
+
+class _Lab2ScreenState extends State<Lab2Screen> {
+  // Default values
   List<List<double>> _initialMatrixA = [
-    [2, -1, 0, 0, 0],
-    [-3, 8, -1, 0, 0],
-    [0, -5, 12, 2, 0],
-    [0, 0, -6, 18, -4],
-    [0, 0, 0, -5, 10],
+    [5, 0, 1],
+    [2, 6, -2],
+    [-3, 2, 10],
   ];
-  List<double> _initialVectorD = [-25, 72, -69, -156, 20];
+  List<double> _initialVectorF = [11, 8, 6];
+  List<double> _initialApproximationX0 = [0, 0, 0];
+  double _tolerance = 0.001;
+  int _maxIterations = 100;
 
-  List<double>? _solutionsX;
+  Map<String, dynamic>? _jacobiResult;
+  Map<String, dynamic>? _gaussSeidelResult;
   String _errorMessage = '';
+  String _diagonalDominanceMessage = '';
 
-  // For dynamic input
   late int _matrixSize;
   late List<List<TextEditingController>> _matrixAControllers;
-  late List<TextEditingController> _vectorDControllers;
+  late List<TextEditingController> _vectorFControllers;
+  late List<TextEditingController> _initialApproxControllers;
+  late TextEditingController _toleranceController;
+  late TextEditingController _maxIterationsController;
 
   @override
   void initState() {
     super.initState();
     _matrixSize = _initialMatrixA.length;
     _initializeControllers();
-    // Optionally run with initial values
-    // _runThomasAlgorithm();
   }
 
   void _initializeControllers() {
     _matrixAControllers = List.generate(
       _matrixSize,
-          (i) => List.generate(
+      (i) => List.generate(
         _matrixSize,
-            (j) {
-          double val = 0.0;
-          if (i < _initialMatrixA.length && j < _initialMatrixA[i].length) {
-            val = _initialMatrixA[i][j];
-          }
-          // For tridiagonal, pre-fill non-tridiagonal as 0 and make them read-only if desired
-          // For simplicity here, we allow editing all, but logic will only use tridiagonal parts.
-          return TextEditingController(text: val.toString());
-        },
+        (j) => TextEditingController(
+            text: (i < _initialMatrixA.length && j < _initialMatrixA[i].length)
+                ? _initialMatrixA[i][j].toString()
+                : '0.0'),
       ),
     );
 
-    _vectorDControllers = List.generate(
+    _vectorFControllers = List.generate(
       _matrixSize,
-          (i) {
-        double val = 0.0;
-        if (i < _initialVectorD.length) {
-          val = _initialVectorD[i];
-        }
-        return TextEditingController(text: val.toString());
-      },
+      (i) => TextEditingController(
+          text: (i < _initialVectorF.length) ? _initialVectorF[i].toString() : '0.0'),
     );
-    // Update state to rebuild UI with new controllers
+
+    _initialApproxControllers = List.generate(
+      _matrixSize,
+      (i) => TextEditingController(
+          text: (i < _initialApproximationX0.length)
+              ? _initialApproximationX0[i].toString()
+              : '0.0'),
+    );
+
+    _toleranceController = TextEditingController(text: _tolerance.toString());
+    _maxIterationsController = TextEditingController(text: _maxIterations.toString());
+
     if (mounted) {
       setState(() {});
     }
@@ -72,57 +78,80 @@ class Lab2Screen extends StatefulWidget {
 
   void _updateMatrixSize(String value) {
     final size = int.tryParse(value);
-    if (size != null && size > 0) {
+    if (size != null && size > 0 && size != _matrixSize) {
       setState(() {
         _matrixSize = size;
-        // Reset initial matrices to empty or sensible defaults for new size
-        _initialMatrixA = List.generate(_matrixSize, (i) => List.generate(_matrixSize, (j) => (i == j ? 1.0 : (i-j).abs() == 1 ? 0.5 : 0.0) ));
-        _initialVectorD = List.filled(_matrixSize, 0.0);
-        _initializeControllers();
-        _solutionsX = null;
+        // Reset matrices and vectors with new default sizes
+        _initialMatrixA = List.generate(
+            _matrixSize, (i) => List.generate(_matrixSize, (j) => (i == j ? 1.0 : 0.0)));
+        _initialVectorF = List.filled(_matrixSize, 0.0);
+        _initialApproximationX0 = List.filled(_matrixSize, 0.0);
+        _initializeControllers(); // This will re-create controllers with new dimensions
+        _jacobiResult = null;
+        _gaussSeidelResult = null;
         _errorMessage = '';
+        _diagonalDominanceMessage = '';
       });
     }
   }
 
   void _updateSystemFromControllers() {
-    List<List<double>> newMatrixA = List.generate(
+    _initialMatrixA = List.generate(
       _matrixSize,
-          (i) => List.generate(
+      (i) => List.generate(
         _matrixSize,
-            (j) => double.tryParse(_matrixAControllers[i][j].text) ?? 0.0,
+        (j) => double.tryParse(_matrixAControllers[i][j].text) ?? 0.0,
       ),
     );
-    List<double> newVectorD = List.generate(
+    _initialVectorF = List.generate(
       _matrixSize,
-          (i) => double.tryParse(_vectorDControllers[i].text) ?? 0.0,
+      (i) => double.tryParse(_vectorFControllers[i].text) ?? 0.0,
     );
-    setState(() {
-      _initialMatrixA = newMatrixA;
-      _initialVectorD = newVectorD;
-    });
+    _initialApproximationX0 = List.generate(
+      _matrixSize,
+      (i) => double.tryParse(_initialApproxControllers[i].text) ?? 0.0,
+    );
+    _tolerance = double.tryParse(_toleranceController.text) ?? 0.001;
+    _maxIterations = int.tryParse(_maxIterationsController.text) ?? 100;
   }
 
-  void _runThomasAlgorithm() {
+  void _runMethods() {
     FocusScope.of(context).unfocus(); // Dismiss keyboard
-    _updateSystemFromControllers(); // Get latest values from TextFields
+    _updateSystemFromControllers();
 
     setState(() {
       _errorMessage = '';
-      _solutionsX = null;
+      _jacobiResult = null;
+      _gaussSeidelResult = null;
+      _diagonalDominanceMessage = '';
     });
 
     try {
-      // Parse the full matrix A and vector d into a, b, c, d diagonals
-      Map<String, List<double>> parsedSystem =
-      parseTridiagonalSystem(_initialMatrixA, _initialVectorD);
+      bool isDominant = checkDiagonalDominance(_initialMatrixA);
+      setState(() {
+        _diagonalDominanceMessage = isDominant
+            ? "Матрица A диагонально доминирующая"
+            : "Матрица A не диагонально доминирующая схождение не гарантировано!";
+      });
+      
+      // Run Jacobi
+      _jacobiResult = jacobiMethod(
+        A: _initialMatrixA,
+        f: _initialVectorF,
+        initialApproximation: _initialApproximationX0,
+        tolerance: _tolerance,
+        maxIterations: _maxIterations,
+      );
 
-      List<double> a = parsedSystem['a']!;
-      List<double> b = parsedSystem['b']!;
-      List<double> c = parsedSystem['c']!;
-      List<double> d = parsedSystem['d']!;
+      // Run Gauss-Seidel
+      _gaussSeidelResult = gaussSeidelMethod(
+        A: _initialMatrixA,
+        f: _initialVectorF,
+        initialApproximation: _initialApproximationX0,
+        tolerance: _tolerance,
+        maxIterations: _maxIterations,
+      );
 
-      _solutionsX = thomasAlgorithm(a, b, c, d);
     } catch (e) {
       setState(() {
         _errorMessage = "Error: ${e.toString()}";
@@ -133,14 +162,11 @@ class Lab2Screen extends StatefulWidget {
 
   @override
   void dispose() {
-    for (var rowControllers in _matrixAControllers) {
-      for (var controller in rowControllers) {
-        controller.dispose();
-      }
-    }
-    for (var controller in _vectorDControllers) {
-      controller.dispose();
-    }
+    _matrixAControllers.forEach((row) => row.forEach((controller) => controller.dispose()));
+    _vectorFControllers.forEach((controller) => controller.dispose());
+    _initialApproxControllers.forEach((controller) => controller.dispose());
+    _toleranceController.dispose();
+    _maxIterationsController.dispose();
     super.dispose();
   }
 
@@ -148,51 +174,53 @@ class Lab2Screen extends StatefulWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Thomas Algorithm (Tridiagonal)'),
+        title: Text(widget.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text('System: Ax = d', style: Theme.of(context).textTheme.headlineSmall),
+            Text('System: Ax = f', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 10),
 
-            // Input for matrix size
             TextField(
               decoration: const InputDecoration(
-                labelText: 'Matrix Size (n x n for A)',
+                labelText: 'Размер матрицы (n x n для A)',
                 border: OutlineInputBorder(),
               ),
               keyboardType: TextInputType.number,
               controller: TextEditingController(text: _matrixSize.toString()),
-              onSubmitted: _updateMatrixSize, // Or onChanged if you prefer live updates
+               onSubmitted: _updateMatrixSize, // Update on submit
+               onChanged: (value) { // Tentative update for matrix size input
+                 final newSize = int.tryParse(value);
+                 if (newSize == null || newSize <= 0) {
+                    // Maybe show a small validation message or just don't update
+                    return; 
+                 }
+                 if (newSize != _matrixSize) {
+                    // Debounce or confirm before resizing to avoid performance issues on every keystroke
+                    // For now, let's keep it onSubmitted, or use a button to confirm size change
+                 }
+               },
             ),
             const SizedBox(height: 16),
 
-            // --- Matrix A Input ---
-            Text('Coefficient Matrix A (Tridiagonal):', style: Theme.of(context).textTheme.titleMedium),
+            Text('Матрица A:', style: Theme.of(context).textTheme.titleMedium),
             if (_matrixAControllers.isNotEmpty)
               Table(
                 border: TableBorder.all(color: Colors.grey),
-                defaultColumnWidth: const IntrinsicColumnWidth(flex: 1),
                 children: List.generate(_matrixSize, (i) {
                   return TableRow(
                     children: List.generate(_matrixSize, (j) {
-                      bool isTridiagonalElement = (i == j) || (i - j).abs() == 1;
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2.0),
                         child: TextField(
                           controller: _matrixAControllers[i][j],
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true, signed: true),
                           textAlign: TextAlign.center,
-                          style: TextStyle(backgroundColor: isTridiagonalElement ? Colors.transparent : Colors.grey[300]),
-                          readOnly: !isTridiagonalElement, // Make non-tridiagonal elements read-only
-                          decoration: InputDecoration(
-                            hintText: 'A[${i+1}][${j+1}]',
-                            fillColor: isTridiagonalElement ? null : Colors.grey[200],
-                            filled: !isTridiagonalElement,
-                          ),
+                          decoration: InputDecoration(hintText: 'A[${i + 1}][${j + 1}]'),
                         ),
                       );
                     }),
@@ -201,35 +229,82 @@ class Lab2Screen extends StatefulWidget {
               ),
             const SizedBox(height: 16),
 
-            // --- Vector d Input ---
-            Text('Right-Hand Side Vector d:', style: Theme.of(context).textTheme.titleMedium),
-            if (_vectorDControllers.isNotEmpty)
+            Text('Вектор значений f:', style: Theme.of(context).textTheme.titleMedium),
+            if (_vectorFControllers.isNotEmpty)
               Table(
                 children: List.generate(_matrixSize, (i) {
-                  return TableRow(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                          child: TextField(
-                            controller: _vectorDControllers[i],
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(hintText: 'd[${i+1}]'),
-                          ),
-                        ),
-                      ]
-                  );
+                  return TableRow(children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                      child: TextField(
+                        controller: _vectorFControllers[i],
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true, signed: true),
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(hintText: 'f[${i + 1}]'),
+                      ),
+                    ),
+                  ]);
                 }),
               ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            Center(
-              child: ElevatedButton(
-                onPressed: _runThomasAlgorithm,
-                child: const Text('Solve with Thomas Algorithm'),
+            Text('Первоначальное приближение x(0):', style: Theme.of(context).textTheme.titleMedium),
+             if (_initialApproxControllers.isNotEmpty)
+              Table(
+                children: List.generate(_matrixSize, (i) {
+                  return TableRow(children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                      child: TextField(
+                        controller: _initialApproxControllers[i],
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true, signed: true),
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(hintText: 'x0[${i + 1}]'),
+                      ),
+                    ),
+                  ]);
+                }),
               ),
+            const SizedBox(height: 16),
+
+            TextField(
+              controller: _toleranceController,
+              decoration: const InputDecoration(
+                  labelText: 'Точность (e.g., 0.001)',
+                  border: OutlineInputBorder()),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            const SizedBox(height: 10),
+
+            TextField(
+              controller: _maxIterationsController,
+              decoration: const InputDecoration(
+                  labelText: 'Ограничение итераций (e.g., 100)',
+                  border: OutlineInputBorder()),
+              keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: _runMethods,
+              child: const Text('--Решить--'),
+            ),
+            const SizedBox(height: 20),
+
+            if (_diagonalDominanceMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  _diagonalDominanceMessage,
+                  style: TextStyle(
+                      color: _diagonalDominanceMessage.contains("не диагонально")
+                          ? Colors.orange
+                          : Colors.green,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
 
             if (_errorMessage.isNotEmpty)
               Padding(
@@ -239,24 +314,79 @@ class Lab2Screen extends StatefulWidget {
                   style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                 ),
               ),
+            
+            if (_jacobiResult != null && _jacobiResult!['error'] == null)
+              _buildResultSection("Метод Якоби", _jacobiResult!),
+            if (_jacobiResult != null && _jacobiResult!['error'] != null)
+              _buildErrorSection("Jacobi Method Error", _jacobiResult!['error']),
 
-            if (_solutionsX != null)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Solutions (x):',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  ..._solutionsX!.asMap().entries.map((entry) {
-                    return Text(
-                        'x[${entry.key + 1}] = ${entry.value.toStringAsFixed(4)}');
-                  }).toList(),
-                ],
-              ),
+
+            if (_gaussSeidelResult != null && _gaussSeidelResult!['error'] == null)
+              _buildResultSection("Гаусс-Зейдель Метод", _gaussSeidelResult!),
+            if (_gaussSeidelResult != null && _gaussSeidelResult!['error'] != null)
+              _buildErrorSection("Gauss-Seidel Method Error", _gaussSeidelResult!['error']),
+
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildErrorSection(String title, String error) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.red)),
+          const SizedBox(height: 5),
+          Text(error, style: const TextStyle(color: Colors.redAccent)),
+          const Divider(),
+        ],     ),
+    );
+  }
+
+  Widget _buildResultSection(String methodName, Map<String, dynamic> result) {
+    List<double> solution = result['solution'] as List<double>;
+    int iterations = result['iterations'] as int;
+    double achievedTolerance = result['achievedTolerance'] as double;
+    double timeMs = result['executionTimeMs'] as double;
+    List<String> steps = result['steps'] as List<String>;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(methodName, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text('Приближенное решение (x):', style: Theme.of(context).textTheme.titleMedium),
+          ...solution.asMap().entries.map(
+                (entry) => Text('x[${entry.key}] = ${entry.value.toStringAsFixed(5)}'),
+              ),
+          const SizedBox(height: 8),
+          Text('Итерации: $iterations'),
+          Text('Достигнута точность: ${achievedTolerance.toStringAsExponential(3)}'),
+          Text('Время выполнения: ${timeMs.toStringAsFixed(3)} ms'),
+          const SizedBox(height: 8),
+          Text('Шаги:', style: Theme.of(context).textTheme.titleMedium),
+          Container(
+            height: 150, // Constrain height for scrollability
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Scrollbar(
+              thumbVisibility: true,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8.0),
+                itemCount: steps.length,
+                itemBuilder: (context, index) => Text(steps[index], style: const TextStyle(fontFamily: 'monospace')),
+              ),
+            ),
+          ),
+          const Divider(height: 20, thickness: 1),
+        ],
       ),
     );
   }

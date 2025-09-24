@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'lab1_screen.dart';
+import 'lab11_screen.dart';
+import 'lab12_screen.dart';
 import 'lab2_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -7,12 +8,12 @@ class HomeScreen extends StatelessWidget {
 
   final String title;
 
-  final String lab1 = "Лабораторная работа 1";
+  final String lab11 = "Лабораторная работа 1.1";
+  final String lab12 = "Лабораторная работа 1.2";
   final String lab2 = "Лабораторная работа 2";
   final String lab3 = "Лабораторная работа 3";
   final String lab4 = "Лабораторная работа 4";
   final String lab5 = "Лабораторная работа 5";
-  final String lab6 = "Лабораторная работа 6";
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +24,20 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             ElevatedButton(
-              child: Text(lab1),
+              child: Text(lab11),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Lab1Screen(title: lab1)),
+                  MaterialPageRoute(builder: (context) => Lab11Screen(title: lab11)),
+                );
+              },
+            ),
+            ElevatedButton(
+              child: Text(lab12),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Lab12Screen(title: lab12)),
                 );
               },
             ),
@@ -45,7 +55,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Lab1Screen(title: lab3)),
+                  MaterialPageRoute(builder: (context) => Lab11Screen(title: lab3)),
                 );
               },
             ),
@@ -54,7 +64,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Lab1Screen(title: lab4)),
+                  MaterialPageRoute(builder: (context) => Lab11Screen(title: lab4)),
                 );
               },
             ),
@@ -63,16 +73,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Lab1Screen(title: lab5)),
-                );
-              },
-            ),
-            ElevatedButton(
-              child: Text(lab6),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Lab1Screen(title: lab6)),
+                  MaterialPageRoute(builder: (context) => Lab11Screen(title: lab5)),
                 );
               },
             ),

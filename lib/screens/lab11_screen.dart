@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import '../logic/lab1_logic.dart';
+import '../logic/lab11_logic.dart';
 
-class Lab1Screen extends StatefulWidget {
-  const Lab1Screen({super.key, required this.title});
+class Lab11Screen extends StatefulWidget {
+  const Lab11Screen({super.key, required this.title});
 
   final String title;
 
   @override
-  State<Lab1Screen> createState() => _Lab1ScreenState();
+  State<Lab11Screen> createState() => _Lab11ScreenState();
 }
 
-class _Lab1ScreenState extends State<Lab1Screen> {
+class _Lab11ScreenState extends State<Lab11Screen> {
 
   List<List<double>> _initialMatrix = [
     [5, 0, 1, 11],
