@@ -1,31 +1,18 @@
 import 'dart:math';
 
-// Helper to print matrix for debugging
 String _matrixToString(List<List<double>> matrix) {
   return matrix.map((row) => row.map((e) => e.toStringAsFixed(3)).join('\t')).join('\n');
 }
 
-// Helper to print vector for debugging
 String _vectorToString(List<double> vector, {int precision = 3}) {
   return '[${vector.map((e) => e.toStringAsFixed(precision)).join(', ')}]';
 }
 
-// Helper to calculate the infinity norm of a vector (max absolute element)
 double _infinityNorm(List<double> vector) {
   if (vector.isEmpty) return 0.0;
   return vector.map((e) => e.abs()).reduce(max);
 }
 
-/// Checks if a matrix is strictly diagonally dominant.
-/// A matrix A is strictly diagonally dominant if for every row i,
-/// the absolute value of the diagonal element A[i][i] is greater than
-/// the sum of the absolute values of all other elements in that row.
-///
-/// Args:
-///   A: The matrix (List of Lists of doubles).
-///
-/// Returns:
-///   true if the matrix is strictly diagonally dominant, false otherwise.
 bool checkDiagonalDominance(List<List<double>> A) {
   print("--- Checking Diagonal Dominance ---");
   print("Matrix A:\n${_matrixToString(A)}");
@@ -60,7 +47,7 @@ Map<String, dynamic> jacobiMethod({
   required List<List<double>> A,
   required List<double> f,
   required List<double> initialApproximation,
-  required double tolerance, // Renamed from accuracy to tolerance for clarity
+  required double tolerance,
   required int maxIterations,
 }) {
   final stopwatch = Stopwatch()..start();
@@ -105,6 +92,7 @@ Map<String, dynamic> jacobiMethod({
           print("ERROR: Division by zero at A[$i][$i].");
           print("--- Jacobi Method Ended (Error) ---\n");
           return result;
+
       }
       xNext[i] = (f[i] - sumSigma) / A[i][i];
     }
