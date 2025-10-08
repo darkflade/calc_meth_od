@@ -3,18 +3,25 @@ import 'package:calc_meth_od/logic/lab4_logic.dart';
 
 // --- Глобальная функция для парсинга данных из контроллеров ---
 List<DataPoint> _parseDataPoints(List<TextEditingController> xControllers, List<TextEditingController> yControllers) {
+  print("--- Parsing data points from table ---");
   final List<DataPoint> points = [];
   for (int i = 0; i < xControllers.length; i++) {
     final x = double.tryParse(xControllers[i].text);
     final y = double.tryParse(yControllers[i].text);
     if (x == null || y == null) {
-      throw ArgumentError("Ошибка в таблице, строка ${i + 1}. Введите корректные числа.");
+      final errorMsg = "Ошибка в таблице, строка ${i + 1}. Введите корректные числа.";
+      print("Parsing error: $errorMsg");
+      throw ArgumentError(errorMsg);
     }
     points.add(DataPoint(x, y));
   }
   if (points.isEmpty) {
-    throw ArgumentError("Таблица данных не может быть пустой.");
+    const errorMsg = "Таблица данных не может быть пустой.";
+    print("Parsing error: $errorMsg");
+    throw ArgumentError(errorMsg);
   }
+  print("Successfully parsed ${points.length} points.");
+  print("--- Finished parsing data points ---");
   return points;
 }
 
@@ -88,6 +95,7 @@ class _LagrangeAitkenViewState extends State<_LagrangeAitkenView> {
   }
 
   void _calculate() {
+    print("--- Starting Lagrange and Aitken calculation ---");
     setState(() {
       _lagrangeResult = null;
       _aitkenResult = null;
@@ -98,22 +106,31 @@ class _LagrangeAitkenViewState extends State<_LagrangeAitkenView> {
     final epsilon = double.tryParse(_epsilonController.text);
     if (targetX == null || epsilon == null) {
       setState(() => _errorMessage = "Проверьте точку X и точность ε.");
+      print("Error: Invalid input for targetX or epsilon.");
       return;
     }
+    print("Inputs: targetX = $targetX, epsilon = $epsilon");
 
     try {
       final dataPoints = _parseDataPoints(_xControllers, _yControllers);
       final logic = InterpolationLogic(dataPoints);
 
+      print("\n>>> Calculating Lagrange polynomial...");
       final lResult = logic.lagrange(targetX);
+      print("<<< Lagrange calculation finished. Result: $lResult");
+
+      print("\n>>> Calculating with Aitken's scheme...");
       final aResult = logic.aitken(targetX, epsilon);
+      print("<<< Aitken's scheme finished. Result: $aResult");
 
       setState(() {
         _lagrangeResult = "f($targetX) ≈ ${lResult.toStringAsFixed(6)}";
         _aitkenResult = "f($targetX) ≈ ${(aResult['value'] as double).toStringAsFixed(6)} (Итераций: ${aResult['iterations']})";
       });
+      print("--- Lagrange and Aitken calculation finished successfully ---");
 
     } catch (e) {
+      print("Error during calculation: $e");
       setState(() => _errorMessage = e.toString());
     }
   }
@@ -197,6 +214,7 @@ class _NewtonViewState extends State<_NewtonView> {
   }
 
   void _calculate() {
+    print("--- Starting Newton interpolation calculation ---");
     setState(() {
       _newtonResults = null;
       _errorMessage = null;
@@ -205,22 +223,32 @@ class _NewtonViewState extends State<_NewtonView> {
     final targetPoints = _targetXController.text.split(',').map((e) => double.tryParse(e.trim())).toList();
     if (targetPoints.any((p) => p == null)) {
       setState(() => _errorMessage = "Проверьте точки для интерполяции. Формат: 0.1, 0.8");
+      print("Error: Invalid input for target points.");
       return;
     }
+    print("Inputs: targetPoints = $targetPoints");
 
     try {
       final dataPoints = _parseDataPoints(_xControllers, _yControllers);
       final logic = InterpolationLogic(dataPoints);
+
+      print("\n>>> Calculating finite differences table...");
       final table = logic.calculateFiniteDifferences();
+      print("<<< Finished calculating finite differences table.");
 
       final results = targetPoints.map((x) {
-        final val = logic.newton(x!, table);
+        if (x == null) return "Invalid point";
+        print("\n>>> Calculating Newton interpolation for x = $x...");
+        final val = logic.newton(x, table);
+        print("<<< Newton interpolation for x = $x finished. Result: $val");
         return "f($x) ≈ ${val.toStringAsFixed(6)}";
       }).join('\n');
 
       setState(() { _newtonResults = results; });
+      print("--- Newton interpolation calculation finished successfully ---");
 
     } catch (e) {
+      print("Error during calculation: $e");
       setState(() => _errorMessage = e.toString());
     }
   }

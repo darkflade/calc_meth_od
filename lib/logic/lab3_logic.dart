@@ -1,5 +1,3 @@
-import 'dart:math';
-
 typedef MathFunction = double Function(double);
 
 class Lab3Logic {

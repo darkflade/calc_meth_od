@@ -119,9 +119,6 @@ class _NewtonTaskViewState extends State<_NewtonTaskView> {
   }
 }
 
-
-// ... (весь остальной код остается без изменений) ...
-
 // --- Виджет для Задачи 2: Метод Половинного Деления ---
 class _BisectionTaskView extends StatefulWidget {
   const _BisectionTaskView();
@@ -131,13 +128,11 @@ class _BisectionTaskView extends StatefulWidget {
 }
 
 class _BisectionTaskViewState extends State<_BisectionTaskView> {
-  final _aController = TextEditingController(text: '-10'); // Расширим интервал для поиска
+  final _aController = TextEditingController(text: '-10');
   final _bController = TextEditingController(text: '10');
-  // ---> ДОБАВЛЕНО: Контроллер для шага
   final _stepController = TextEditingController(text: '0.1');
   final _accuracyController = TextEditingController(text: '0.0001');
 
-  // ---> ИЗМЕНЕНО: Храним список результатов
   List<Map<String, double>>? _results;
   String? _errorMessage;
 
@@ -147,7 +142,7 @@ class _BisectionTaskViewState extends State<_BisectionTaskView> {
   void _calculate() {
     final a = double.tryParse(_aController.text);
     final b = double.tryParse(_bController.text);
-    final step = double.tryParse(_stepController.text); // ---> Считываем шаг
+    final step = double.tryParse(_stepController.text);
     final accuracy = double.tryParse(_accuracyController.text);
 
     if (a == null || b == null || step == null || accuracy == null || accuracy <= 0 || step <= 0) {
@@ -161,7 +156,6 @@ class _BisectionTaskViewState extends State<_BisectionTaskView> {
     final logic = Lab3Logic(f: f);
 
     try {
-      // ---> ИЗМЕНЕНО: Вызываем новый метод для поиска всех корней
       final res = logic.findAllRootsBisection(a, b, step, accuracy);
       setState(() {
         _results = res;
