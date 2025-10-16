@@ -143,7 +143,7 @@ class InterpolationLogic {
 
     print('Таблица конечных разностей:\n');
     for (int i = 0; i < differences.length; i++) {
-      String row = ' ' * (i * 4); // смещение для наглядности
+      String row = ' ' * (i * 4);
       row += 'Δ^${i + 1}y'.padRight(8);
       for (int j = 0; j < differences[i].length; j++) {
         row += differences[i][j].toStringAsFixed(6).padLeft(12);
@@ -196,14 +196,6 @@ class InterpolationLogic {
           '${tProduct.toStringAsFixed(6).padRight(9)} | '
           '${term.toStringAsFixed(6).padRight(9)} | '
           '${result.toStringAsFixed(6)}');
-      /*
-      print('\nШаг ${i + 1}:');
-      print('  t-произведение = $tProduct');
-      print('  факториал = $factorial');
-      print('  Δ^${i + 1}y0 = ${diffTable[i][0]}');
-      print('   Слагаемое = $term');
-      print('  Текущий результат: $result');
-      */
     }
 
     print('\n✅ Итоговый результат (Ньютон): $result');

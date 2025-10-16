@@ -1,0 +1,11 @@
+[package]
+name = "rust_lib_lab5"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+scirs2-integrate = "0.1.0-rc.1"
+
+[[bin]]
+name = "rust_lib_lab5"
+path = "main.rs"

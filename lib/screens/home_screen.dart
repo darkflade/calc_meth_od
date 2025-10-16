@@ -1,9 +1,10 @@
-import 'package:calc_meth_od/screens/lab4_screen.dart';
 import 'package:flutter/material.dart';
 import 'lab11_screen.dart';
 import 'lab12_screen.dart';
 import 'lab2_screen.dart';
 import 'lab3_screen.dart';
+import 'lab4_screen.dart';
+import 'lab5_screen.dart';
 
 // A data class to hold information about each lab for the grid.
 class _LabInfo {
@@ -61,7 +62,7 @@ class HomeScreen extends StatelessWidget {
       ),
       _LabInfo(
         title: "Лабораторная работа 5",
-        screen: Lab11Screen(title: "Лабораторная работа 5"),
+        screen: Lab5Screen(),
         icon: Icons.all_inclusive_outlined,
         color: Colors.teal,
       ),

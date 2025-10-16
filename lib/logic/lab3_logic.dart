@@ -36,6 +36,28 @@ class Lab3Logic {
     return {'root': x, 'iterations': iterations.toDouble()};
   }
 
+  Map<String, double> newtonMethodFor5(double initialGuess, double epsilon) {
+    double x = initialGuess;
+    int iterations = 0;
+    double prevX;
+
+    do {
+      prevX = x;
+      double fx = f(prevX);
+      double dfx = df!(prevX);
+
+      if (dfx.abs() < 1e-15) {
+        print("Предупреждение: Производная близка к нулю в точке $prevX");
+        break;
+      }
+
+      x = prevX - fx / dfx;
+      iterations++;
+    } while ((x - prevX).abs() > epsilon && iterations < 100);
+
+    return {'root': x, 'iterations': iterations.toDouble()};
+  }
+
   // Метод половинного деления (для одного корня)
   Map<String, double> bisectionMethod(double a, double b, double epsilon) {
     // Проверка пограничного корня
