@@ -141,13 +141,13 @@ class _Lab5ScreenState extends State<Lab5Screen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Интеграл ∫∫∫ x dz dy dx',
+              'Интеграл ∫∫∫ x dx dy dz',
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(
-              'x∈[1,2], y∈[2,4], z∈[1,5]',
+              'x∈[1,5], y∈[2,4], z∈[1,2]',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),

@@ -1,4 +1,4 @@
-from mpmath import mp, sin, quad, quadts, quadgl, quadts
+from mpmath import mp, sin, quad, quadts, quadts
 
 # Точность 50 знаков
 mp.dps = 50

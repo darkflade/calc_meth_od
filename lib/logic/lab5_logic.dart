@@ -3,13 +3,13 @@ import 'lab3_logic.dart';
 
 // ---- Подынтегральная функция ----
 double f(double x) {
-  if (x == 0) return 0; // Предотвращение деления на ноль
+  if (x == 0) return 0;
   return x * sin(1 / pow(x, 3));
 }
 
 // ---- Метод Симпсона ----
 double simpson(double a, double b, int n) {
-  if (n % 2 != 0) n++; // Симпсон требует чётное n
+  if (n % 2 != 0) n++;
   double h = (b - a) / n;
   double sum1 = 0.0;
   double sum2 = 0.0;
@@ -29,11 +29,11 @@ Map<String, dynamic> simpsonWithRunge(double a, double b, double eps) {
   int n = 4;
   double i1 = simpson(a, b, n);
   double i2 = simpson(a, b, n * 2);
-  const p = 4; // порядок точности Симпсона
+  const p = 4;
 
   while ((i2 - i1).abs() / (pow(2, p) - 1) > eps) {
     n *= 2;
-    if (n > 10000) { // Предохранитель от бесконечного цикла
+    if (n > 10000) {
       throw Exception("Достигнут предел итераций для Симпсона.");
     }
     i1 = i2;
@@ -47,7 +47,6 @@ Map<String, dynamic> simpsonWithRunge(double a, double b, double eps) {
 
 
 // ---- Гаусс-Лежандр квадратура ----
-// ----      Лежандр лежит       ----
 class DynamicGaussLegendre {
   static Map<String, double> legendrePolynomial(int n, double x) {
     if (n == 0) return {'p': 1.0, 'dp': 0.0};
@@ -75,7 +74,6 @@ class DynamicGaussLegendre {
     print("      Генерация узлов и весов Гаусса-Лежандра (n=$n)");
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-    // Ищем корни. Они симметричны относительно нуля.
     for (int i = 0; i < (n + 1) / 2; i++) {
 
 
@@ -96,7 +94,7 @@ class DynamicGaussLegendre {
       final weight = 2 / ((1 - root * root) * dp_val * dp_val);
 
       weights[i] = weight;
-      weights[n - 1 - i] = weight; // Симметричный вес
+      weights[n - 1 - i] = weight;
 
       print(" Корень найден: x = ${root.toStringAsFixed(12)}");
       print("️  Вес: w = ${weight.toStringAsFixed(12)}");
@@ -183,14 +181,12 @@ class MonteCarloLogic {
     double sumFx = 0.0;
 
     for (int i = 0; i < N; i++) {
-      // Интеграл ∫∫∫ x dz dy dx
-      // по области x∈[1,2], y∈[2,4], z∈[1,5]
-      double x = 1 + rand.nextDouble();
+      double x = 1 + rand.nextDouble() * 4;
       sumFx += x;
     }
 
     double avgFx = sumFx / N;
-    double volume = (2 - 1) * (4 - 2) * (5 - 1); // объем области = 8
+    double volume = (5 - 1) * (4 - 2) * (2 - 1);
     return avgFx * volume;
   }
 

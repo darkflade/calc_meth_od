@@ -5,6 +5,7 @@ import 'lab2_screen.dart';
 import 'lab3_screen.dart';
 import 'lab4_screen.dart';
 import 'lab5_screen.dart';
+import 'lab6_screen.dart';
 
 // A data class to hold information about each lab for the grid.
 class _LabInfo {
@@ -63,6 +64,12 @@ class HomeScreen extends StatelessWidget {
       _LabInfo(
         title: "Лабораторная работа 5",
         screen: Lab5Screen(),
+        icon: Icons.all_inclusive_outlined,
+        color: Colors.teal,
+      ),
+      _LabInfo(
+        title: "Лабораторная работа 6",
+        screen: Lab6Screen(),
         icon: Icons.all_inclusive_outlined,
         color: Colors.teal,
       ),
